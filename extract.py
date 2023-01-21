@@ -1,4 +1,4 @@
-import re, json, requests,time
+import re, json, time, requests
 from selenium import webdriver
 
 PATH = "/Users/Soccerboy_Krish/Documents/chromedriver"
@@ -9,15 +9,19 @@ def vsco_extract(usernames):
         url = "https://vsco.co/" + username + "/gallery"
         response = requests.get(url).text
         counter = 1
-        data = json.loads(re.search(r'window\.__PRELOADED_STATE__ = (\{.*\})', response).group(1))
-        links = []
+        data = json.loads(
+            re.search(r'window\.__PRELOADED_STATE__ = (\{.*\})', response).group(1))
         for image in data['entities']['images'].values():
-            links.append(image['permalink'])
-
-        for link in links:
+            link = image['permalink']
             driver.get(link)
-            driver.save_screenshot(username + str(counter) + ".png")
-            counter += 1
+            img = driver.find_element_by_css_selector(".disableSave-mobile.css-6dp941")
+            time.sleep(1)
+            screenshot = img.screenshot_as_png
+            with open(username + str(counter) + ".png", "wb") as f:
+                f.write(screenshot)
+                counter += 1
+
 
 profiles = ["krishrastogi"]
+
 vsco_extract(profiles)
